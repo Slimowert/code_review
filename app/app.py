@@ -1,13 +1,14 @@
 from flask import Flask, render_template, url_for, request, redirect
 import os
 import json
+import logging
 
 import create_app, database
 from models import *
 
 
 app = create_app.create_app()
-
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route("/")
 @app.route("/home")
@@ -81,4 +82,4 @@ def about():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=50001, debug=True)

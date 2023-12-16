@@ -3,9 +3,12 @@ import time
 from bs4 import BeautifulSoup
 import requests
 from tqdm import tqdm
+import logging
 
 from cookie import get_cookies, headers
 import database
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def imformation_about_category(url, cookies):
@@ -19,7 +22,7 @@ def imformation_about_category(url, cookies):
 
 
 def get_all_urls_of_category(url, cookies):
-    # print("Формируется лист ссылок категории")
+    logging.info("Формируется лист ссылок категории")
     urls = []
     next_page = url
     while len(next_page) > 0:
@@ -28,7 +31,7 @@ def get_all_urls_of_category(url, cookies):
         urls.extend(get_urls_from_page(soup))
         try:
             next_page = soup.find('button', class_='pagination-widget__show-more-btn')
-            next_page = 'https://www.dns-shop.ru' + next_page.get('data-url')
+            next_page = URL + next_page.get('data-url')
         except AttributeError:
             return urls
     
@@ -37,7 +40,7 @@ def get_all_urls_of_category(url, cookies):
 
 def get_urls_from_page(soup):
     elements = soup.find_all('a', class_="catalog-product__name ui-link ui-link_black") 
-    return list(map(lambda element: 'https://www.dns-shop.ru' + element.get("href") + 'characteristics/', elements))
+    return list(map(lambda element: URL + element.get("href") + 'characteristics/', elements))
 
 
 def get_notebook_data(url, cookies):
@@ -77,7 +80,7 @@ def get_notebook_data(url, cookies):
 def parser(url):
     start_time = time.time()
 
-    cookies=get_cookies()
+    cookies=get_cookies(URL)
 
     category = imformation_about_category(url, cookies)
     urls = get_all_urls_of_category(url, cookies)
@@ -96,13 +99,14 @@ def parser(url):
     database.add_category(category)
 
     total_time = time.time() - start_time
-    print(f"Время выполнения:\n"
+    logging.info(f"Время выполнения:\n"
           f"{(total_time // 3600):02.0f}:"
           f"{(total_time % 3600 // 60):02.0f}:"
           f"{(total_time % 60):02.0f}")
 
 
 if __name__ == '__main__':
+    URL = 'https://www.dns-shop.ru'
     parser(sys.argv[1])
     # parser('https://www.dns-shop.ru/catalog/17a9dcd816404e77/instrumenty-dlya-vitoj-pary/')
     # parser('https://www.dns-shop.ru/catalog/17a892f816404e77/noutbuki/')

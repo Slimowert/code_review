@@ -1,12 +1,13 @@
 import time
 import undetected_chromedriver as uc
+import logging
 
 
-def get_cookies():
-    print("Создаются куки сесии")
+def get_cookies(url):
+    logging.info("Создаются куки сесии")
     driver = uc.Chrome(version_main=114, headless=True)
     driver.maximize_window()
-    driver.get('https://www.dns-shop.ru/')
+    driver.get(url)
     time.sleep(3)
     cookies = driver.get_cookies()
     c = {c['name']:c['value'] for c in cookies}
